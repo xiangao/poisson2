@@ -1,8 +1,12 @@
 library(MASS)
 library(pscl)
 library(msm)
+require(snowfall)
+set.seed(666)
 
-set.seed(6)
+# initialize parallel cores.
+sfInit( parallel=TRUE, cpus=12)
+
 
 gen.sim <- function(df){
     z <- rnorm(df['nobs'],0,1)
@@ -43,7 +47,8 @@ gen.sim <- function(df){
 #    m5 <- glm(y ~ x, family=negative.binomial(2))
     m6.x <- summary(m6)$coefficients$count['x','Estimate']-2
 
-    return(c(zip=m1.x, poisson=m2.x, log.linear=m3.x, zip2=m4.x, nb=m5.x, hurdle=m6.x))
+
+    return(c(zip1=m1.x, poisson=m2.x, log.linear=m3.x, zip2=m4.x, nb=m5.x, hurdle=m6.x))
 }
 
 
@@ -54,7 +59,20 @@ nobs.grid = ceiling(exp(seq(4,9,1))/100)*100
 
 data.grid <- expand.grid(nobs.grid, sim.grid, th.grid)
 names(data.grid) <- c('nobs', 'nsim','th')
-results <- t(apply(data.grid, 1, gen.sim))
+
+# export functions to the slaves
+# export data to the slaves if necessary
+sfExport(list=list("gen.sim"))
+
+# export function to the slaves
+sfLibrary(msm)
+sfLibrary(pscl)
+
+results <- data.frame(t(sfApply(data.grid, 1, gen.sim)))
+
+# stop the cluster
+sfStop()
+
 forshiny <- cbind(data.grid, results)
 # write out for use in shiny.
 write.csv(forshiny, 'results.csv')

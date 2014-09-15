@@ -9,7 +9,7 @@ shinyServer(function(input, output) {
 output$plot1 <-  renderPlot({
     nobs = ceiling(exp(input$n)/100)*100
     th=input$th
-    match <- results[(nobs==results$nobs & th - results$th<1e-5 & !is.na(results$zip2)),c('nobs','nsim','zip','poisson','log.linear','zip2')]
+    match <- results[(nobs==results$nobs & th - results$th<1e-5 & !is.na(results$zip2)),c('nobs','nsim','poisson','nb','log.linear','zip1','zip2','hurdle')]
     match.melt <- melt(match, id.vars=c('nobs','nsim'))
     names(match.melt) <- c('nobs','nsim','type','bias')
     ave.bias <- ddply(match.melt, c('type'),

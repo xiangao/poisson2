@@ -4,7 +4,7 @@ library(shiny)
 shinyUI(pageWithSidebar(
 
   # Application title
-  headerPanel("Poisson model"),
+  headerPanel("Count data models for zero-inflated data (generated from normal and binomial processes)"),
 
   # Sidebar with controls to select the variable to plot against mpg
   # and to specify whether outliers should be included
